@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ca935e7b503384da96003f1b243ba6, type: 3}
+  m_Name: Test_SubtitleBundle
+  m_EditorClassIdentifier: 
+  _timingReference: {fileID: 8300000, guid: c0d8f21ee2042e84a97490b808de1cb8, type: 3}
+  lines:
+  - TimeStamp: 2.33
+    Duration: 2.73
+    SpeakingCharacter: {fileID: 11400000, guid: fa3d3a17e2f8ace49a7179d1640ee49a,
+      type: 2}
+    Content: Hey!
+  - TimeStamp: 0.5
+    Duration: 3
+    SpeakingCharacter: {fileID: 11400000, guid: fa3d3a17e2f8ace49a7179d1640ee49a,
+      type: 2}
+    Content: Hey!
