@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/AccessibleTools/Subtitles/Example/AccessibleToolsSubtitleExample.unity
+    path: Assets/Plugins/AccessibleTools/Subtitles/Example/AccessibleToolsSubtitleExample.unity
     guid: 8666b45b0de2c9846a3f1e701911c910
   m_configObjects: {}

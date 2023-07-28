@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Reflection;
+using UnityEngine;
 using UnityEditor;
 
 namespace AccessibleTools.Subtitles
@@ -25,6 +27,8 @@ namespace AccessibleTools.Subtitles
         private bool _showTabContent = true;
         private bool _showTabAnalysis = false;
         private bool _showTabTranscript = false;
+        private float _audioPlaybackTime = 0f;
+        private float _currentAudioPlaybackMarker;
 
 
         private GUIStyle _colorStyle;
@@ -47,6 +51,7 @@ namespace AccessibleTools.Subtitles
         //private Texture2D _previewAudioWaveform;
 
         private Material _previewAudioMaterial;
+        private bool _isPlayingAudio;
         private Material PreviewAudioMaterial
         {
             get
@@ -128,7 +133,16 @@ namespace AccessibleTools.Subtitles
             img.Apply();
             return img;
         }
-
+        
+        public void Update()
+        {
+            if (_isPlayingAudio)
+            {
+                // This is necessary to make the framerate normal for the editor window.
+                Repaint();
+            }
+        }
+   
 
         private void OnGUI()
         {
@@ -163,10 +177,11 @@ namespace AccessibleTools.Subtitles
                 GUILayout.Space(WaveformHeight);
                 EditorGUI.DrawPreviewTexture(new Rect(4, 60, Screen.width - 8, 180), _audioWaveform);
 
-                GUI.Label(new Rect(8, WaveformHeight + 34, Screen.width - 12, 30), _selectedBundle.TimingReference.length + " seconds");
+                string timeString = _currentAudioPlaybackMarker.ToString("F2") + " / " + _selectedBundle.TimingReference.length.ToString("F2");
+                GUI.Label(new Rect(8, WaveformHeight + 34, Screen.width - 12, 30), timeString + " seconds");
             }
 
-            GUILayout.Space(16);
+            GUILayout.Space(2);
 
             /*
             // edit SubtitleBundle.BundleName
@@ -180,6 +195,28 @@ namespace AccessibleTools.Subtitles
     
             GUILayout.Space(16);
             */
+            
+            
+            
+            EditorGUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Play", GUILayout.MaxWidth(60f)))
+            {
+                PlayClip(_selectedBundle.TimingReference);
+            }
+            
+            if (GUILayout.Button("Stop", GUILayout.MaxWidth(60f)))
+            {
+                StopAllClips();
+            }
+
+            EditorGUILayout.EndHorizontal();
+            
+            
+            
+            GUILayout.Space(8);
+            
+            
 
             // Tab selection
             EditorGUILayout.BeginHorizontal();
@@ -238,8 +275,30 @@ namespace AccessibleTools.Subtitles
                     GUI.Label(new Rect(pixelPos + 2, 55, Screen.width - 12, 30), i.ToString());
                 }
             }
+            
+            
+            
+            if (_isPlayingAudio)
+            {
+                _currentAudioPlaybackMarker = Time.realtimeSinceStartup - _audioPlaybackTime;
+                _currentAudioPlaybackMarker = Mathf.Clamp(_currentAudioPlaybackMarker, 0f, _selectedBundle.TimingReference.length);
+            }
+            // draw audio playback line
+            if (_selectedBundle.TimingReference != null && _audioWaveform != null && Event.current.type == EventType.Repaint)
+            {
+                GL.Clear(true, false, Color.black);
+                PreviewAudioMaterial.SetPass(0);
 
-
+                GL.Begin(GL.QUADS);
+                GL.Color(Color.white);
+                float pixelPos = Mathf.Lerp(4, Screen.width - 4, _currentAudioPlaybackMarker / _selectedBundle.TimingReference.length);
+                GL.Vertex3(pixelPos, 60, 0);
+                GL.Vertex3(pixelPos, WaveformHeight + 60, 0);
+                GL.Vertex3(pixelPos + 2, WaveformHeight + 60, 0);
+                GL.Vertex3(pixelPos + 2, 60, 0);
+                GL.End();
+            }
+            
             GUILayout.BeginHorizontal();
 
             // Content editing
@@ -442,6 +501,53 @@ namespace AccessibleTools.Subtitles
         private void UpdateAudioWaveform()
         {
             _audioWaveform = (_selectedBundle.TimingReference == null) ? null : GetAudioWaveform(_selectedBundle.TimingReference, WaveformWidth, WaveformHeight, Color.white);
+        }
+        
+        public void PlayClip(AudioClip clip, int startSample = 0, bool loop = false)
+        {
+            StopAllClips();
+            
+            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+     
+            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+            MethodInfo method = audioUtilClass.GetMethod(
+                "PlayPreviewClip",
+                BindingFlags.Static | BindingFlags.Public,
+                null,
+                new Type[] { typeof(AudioClip), typeof(int), typeof(bool) },
+                null
+            );
+ 
+            Debug.Log(method);
+            method.Invoke(
+                null,
+                new object[] { clip, startSample, loop }
+            );
+
+            _isPlayingAudio = true;
+            _audioPlaybackTime = Time.realtimeSinceStartup;
+        }
+ 
+        public void StopAllClips()
+        {
+            Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
+ 
+            Type audioUtilClass = unityEditorAssembly.GetType("UnityEditor.AudioUtil");
+            MethodInfo method = audioUtilClass.GetMethod(
+                "StopAllPreviewClips",
+                BindingFlags.Static | BindingFlags.Public,
+                null,
+                new Type[] { },
+                null
+            );
+ 
+            Debug.Log(method);
+            method.Invoke(
+                null,
+                new object[] { }
+            );
+            
+            _isPlayingAudio = false;
         }
     }
 }
