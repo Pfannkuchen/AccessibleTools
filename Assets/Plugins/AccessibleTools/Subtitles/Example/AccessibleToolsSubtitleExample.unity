@@ -272,9 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _entries:
-  - {fileID: 11400000, guid: 7a1a397abc3270846acf404766434702, type: 2}
-  - {fileID: 11400000, guid: 7a1a397abc3270846acf404766434702, type: 2}
-  - {fileID: 11400000, guid: 7a1a397abc3270846acf404766434702, type: 2}
+  - {fileID: 11400000, guid: 39b4a2fad13e6a34ca4e7b9c69c41c23, type: 2}
 --- !u!4 &953641790
 Transform:
   m_ObjectHideFlags: 0
